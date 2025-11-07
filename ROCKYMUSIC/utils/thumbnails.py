@@ -1,148 +1,143 @@
-# =======================================================
-# ©️ 2025-26 All Rights Reserved by Team Rocky (Im-Notcoder) 🚀
-
-# This source code is under MIT License 📜 Unauthorized forking, importing, or using this code without giving proper credit will result in legal action ⚠️
- 
-# 📩 DM for permission : @MrRockytg
-# =======================================================
-
-
 import os
 import re
+import random
 import aiohttp
 import aiofiles
-from ROCKYMUSIC import app
-from config import YOUTUBE_IMG_URL
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
+import traceback
+
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from youtubesearchpython.__future__ import VideosSearch
 
-def clear(text):
-    return re.sub("\s+", " ", text).strip()
 
 def changeImageSize(maxWidth, maxHeight, image):
-    widthRatio = maxWidth / image.size[0]
-    heightRatio = maxHeight / image.size[1]
-    newWidth = int(image.size[0] * min(widthRatio, heightRatio))
-    newHeight = int(image.size[1] * min(widthRatio, heightRatio))
-    return image.resize((newWidth, newHeight))
+    ratio = min(maxWidth / image.size[0], maxHeight / image.size[1])
+    newSize = (int(image.size[0] * ratio), int(image.size[1] * ratio))
+    return image.resize(newSize, Image.ANTIALIAS)
 
-async def get_thumb(videoid):
-    if os.path.isfile(f"cache/{videoid}.png"):
-        return f"cache/{videoid}.png"
 
+def truncate(text, max_chars=50):
+    words = text.split()
+    text1, text2 = "", ""
+    for word in words:
+        if len(text1 + " " + word) <= max_chars and not text2:
+            text1 += " " + word
+        else:
+            text2 += " " + word
+    return [text1.strip(), text2.strip()]
+
+
+def fit_text(draw, text, max_width, font_path, start_size, min_size):
+    size = start_size
+    while size >= min_size:
+        font = ImageFont.truetype(font_path, size)
+        if draw.textlength(text, font=font) <= max_width:
+            return font
+        size -= 1
+    return ImageFont.truetype(font_path, min_size)
+
+def get_overlay_content_box(overlay_img: Image.Image) -> tuple:
+    """Returns bounding box (x1, y1, x2, y2) of the semi-transparent content box in overlay."""
+    alpha = overlay_img.split()[-1]  # Extract alpha channel
+    threshold = 20
+    binary = alpha.point(lambda p: 255 if p > threshold else 0)
+    return binary.getbbox()
+
+async def get_thumb(videoid: str):
     url = f"https://www.youtube.com/watch?v={videoid}"
     try:
         results = VideosSearch(url, limit=1)
-        for result in (await results.next())["result"]:
-            try:
-                title = result["title"]
-                title = re.sub("\W+", " ", title)
-                title = title.title()
-            except:
-                title = "Unsupported Title"
-            try:
-                duration = result["duration"]
-            except:
-                duration = "Unknown Mins"
-            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
-            try:
-                views = result["viewCount"]["short"]
-            except:
-                views = "Unknown Views"
-            try:
-                channel = result["channel"]["name"]
-            except:
-                channel = "Unknown Channel"
+        result = (await results.next())["result"][0]
 
-        
+        title = re.sub(r"\W+", " ", result.get("title", "Unsupported Title")).title()
+        duration = result.get("duration", "00:00")
+        thumbnail = result["thumbnails"][0]["url"].split("?")[0]
+        views = result.get("viewCount", {}).get("short", "Unknown Views")
+        channel = result.get("channel", {}).get("name", "Unknown Channel")
+
+        # Download thumbnail
         async with aiohttp.ClientSession() as session:
             async with session.get(thumbnail) as resp:
                 if resp.status == 200:
-                    f = await aiofiles.open(f"cache/thumb{videoid}.png", mode="wb")
-                    await f.write(await resp.read())
-                    await f.close()
+                    async with aiofiles.open(f"cache/thumb{videoid}.png", mode="wb") as f:
+                        await f.write(await resp.read())
 
         youtube = Image.open(f"cache/thumb{videoid}.png")
-        youtube = youtube.convert("RGBA")
+        image1 = changeImageSize(1280, 720, youtube).convert("RGBA")
 
-        
-        background = youtube.resize((1280, 720)).filter(ImageFilter.GaussianBlur(radius=10))
-        enhancer = ImageEnhance.Brightness(background)
-        background = enhancer.enhance(0.6)  
+        # Create blurred background
+        gradient = Image.new("RGBA", image1.size, (0, 0, 0, 255))
+        enhancer = ImageEnhance.Brightness(image1.filter(ImageFilter.GaussianBlur(5)))
+        blurred = enhancer.enhance(0.3)
+        background = Image.alpha_composite(gradient, blurred)
 
         draw = ImageDraw.Draw(background)
+        font_path = "ROCKYMUSIC/assets/font3.ttf"
 
-    
-        center_thumb_size = (942, 422)
-        center_thumb = youtube.resize(center_thumb_size)
+        # Overlay and bounding box detection
+        player = Image.open("ROCKYMUSIC/assets/nand.png").convert("RGBA").resize((1280, 720))
+        overlay_box = get_overlay_content_box(player)  # (x1, y1, x2, y2)
+        content_x1, content_y1, content_x2, content_y2 = overlay_box
+        background.paste(player, (0, 0), player)
 
-        border_size = 14
-        bordered_center_thumb = Image.new("RGBA", (center_thumb_size[0] + 2 * border_size, center_thumb_size[1] + 2 * border_size), (255, 255, 255))
-        bordered_center_thumb.paste(center_thumb, (border_size, border_size))
+        # 🎯 Album Art Position (dynamically inside content box)
+        thumb_size = int((content_y2 - content_y1) * 0.55)
+        thumb_x = content_x1 + 76
+        thumb_y = content_y1 + ((content_y2 - content_y1 - thumb_size) // 2) + 40
 
-        
-        pos_x = (1280 - bordered_center_thumb.size[0]) // 2
-        pos_y = ((720 - bordered_center_thumb.size[1]) // 2) - 30  
+        mask = Image.new('L', (thumb_size, thumb_size), 0)
+        draw_mask = ImageDraw.Draw(mask)
+        radius = int(thumb_size * 0.25)
+        draw_mask.rounded_rectangle([(0, 0), (thumb_size, thumb_size)], radius=radius, fill=255)
 
-        background.paste(bordered_center_thumb, (pos_x, pos_y))
+        thumb_square = youtube.resize((thumb_size, thumb_size))
+        thumb_square.putalpha(mask)
+        background.paste(thumb_square, (thumb_x, thumb_y), thumb_square)
 
-        
-        arial = ImageFont.truetype("ROCKYMUSIC/assets/font2.ttf", 30)
-        font = ImageFont.truetype("ROCKYMUSIC/assets/font.ttf", 30)
-        bold_font = ImageFont.truetype("ROCKYMUSIC/assets/font.ttf", 33)
+        # 📝 Dynamic Text Positions
+        text_x = thumb_x + thumb_size + 30
+        title_y = thumb_y + 10
+        info_y = title_y + int(thumb_size * 0.33)
+        time_y = info_y + int(thumb_size * 0.28)
 
-    
-        text_size = draw.textsize("@PurviBots   ", font=font)
-        draw.text((1280 - text_size[0] - 10, 10), "@PurviBots   ", fill="yellow", font=font)
+        def truncate_text(text, max_chars=30):
+            return (text[:max_chars - 3] + "...") if len(text) > max_chars else text
 
-    
-        draw.text(
-            (55, 580),  
-            f"{channel} | {views[:23]}",
-            (255, 255, 255),
-            font=arial,
-        )
+        short_title = truncate_text(title, max_chars=20)
+        short_channel = truncate_text(channel, max_chars=20)
 
-        
-        draw.text(
-            (57, 620), 
-            title,
-            (255, 255, 255),
-            font=font,
-        )
+        title_font = fit_text(draw, short_title, 600, font_path, 42, 28)
+        draw.text((text_x, title_y), short_title, (255, 255, 255), font=title_font)
 
-        
-        draw.text((55, 655), "00:00", fill="white", font=bold_font)
+        info_text = f"{short_channel} • {views}"
+        info_font = ImageFont.truetype("ROCKYMUSIC/assets/font2.ttf", 22)
+        draw.text((text_x, info_y), info_text, (200, 200, 200), font=info_font)
 
-        
-        start_x = 150
-        end_x = 1130
-        line_y = 670
-        draw.line([(start_x, line_y), (end_x, line_y)], fill="white", width=4)
+        time_font = ImageFont.truetype("ROCKYMUSIC/assets/font2.ttf", 26)
+        duration_text = duration if ":" in duration else f"00:{duration.zfill(2)}"
+        time_display = f"00:00 / {duration_text}"
+        draw.text((text_x, time_y), time_display, (200, 200, 200), font=time_font)
 
-        
-        duration_text_size = draw.textsize(duration, font=bold_font)
-        draw.text((end_x + 10, 655), duration, fill="white", font=bold_font)
+        # Watermark
+        watermark_font = ImageFont.truetype("ROCKYMUSIC/assets/font2.ttf", 24)
+        watermark_text = "@MrRockyTg"
+        text_size = draw.textsize(watermark_text, font=watermark_font)
+        x = background.width - text_size[0] - 25
+        y = background.height - text_size[1] - 25
+        for dx in (-1, 1):
+            for dy in (-1, 1):
+                draw.text((x + dx, y + dy), watermark_text, font=watermark_font, fill=(0, 0, 0, 180))
+        draw.text((x, y), watermark_text, font=watermark_font, fill=(255, 255, 255, 240))
 
-        
         try:
             os.remove(f"cache/thumb{videoid}.png")
         except:
             pass
 
-        background.save(f"cache/{videoid}.png")
-        return f"cache/{videoid}.png"
+        tpath = f"cache/{videoid}.png"
+        background.save(tpath)
+        return tpath
 
     except Exception as e:
-        print(e)
-        return YOUTUBE_IMG_URL
-
-
-# ======================================================
-# ©️ 2025-26 All Rights Reserved by Team Rocky (Im-Notcoder) 😎
-
-# 🧑‍💻 Developer : t.me/mrrockytg
-# 🔗 Source link : t.me/rockyxsupport
-# 📢 Telegram channel : t.me/rockyxupdate
-# =======================================================
-        
+        print(f"[get_thumb Error] {e}")
+        traceback.print_exc()
+        return None
