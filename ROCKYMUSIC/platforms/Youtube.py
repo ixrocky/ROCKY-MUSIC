@@ -16,7 +16,10 @@ import random
 import logging
 import aiohttp
 import config
-from config import API_URL, VIDEO_API_URL, API_KEY
+
+API_URL = "https://pytdbotapi.thequickearn.xyz"
+VIDEO_API_URL = "https://api.video.thequickearn.xyz"
+API_KEY = "NxGBNexGenBotsbb404a"
 
 
 def cookie_txt_file():
@@ -596,4 +599,5 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await download_song(link)
         return downloaded_file, direct
+
 
