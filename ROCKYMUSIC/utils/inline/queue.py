@@ -85,10 +85,10 @@ def queue_back_markup(_, CPLAY):
       #  ],
        # [
           #  InlineKeyboardButton(
-              #  text="˹❍ᴡηєʀ ᴧʙσᴜᴛ˼ ", url=f"https://t.me/IshqKiDuniyao"
+              #  text="˹ᴄʜᴀᴛ ʙᴏᴛ˼ ", url=f"https://t.me/JullyChatBot"
              #),
           #  InlineKeyboardButton(
-              #  text="˹ᴄʜᴧᴛ ɢʀσᴜᴘ˼", url=f"https://t.me/rockyxsuppot"
+              #  text="˹ᴍᴜsɪᴄ ʙᴏᴛ ˼", url=f"https://t.me/ShriramxBot"
             #),
         #],
      # ]
@@ -98,19 +98,13 @@ def aq_markup(_, chat_id):
     buttons = [
         [
             InlineKeyboardButton(
-                text="• ᴊᴏɪη ησᴡ •",
-                url=f"https://t.me/IshqKiDuniyao"
+                text="• ᴄʜᴀᴛ ʙᴏᴛ •",
+                url=f"https://t.me/JullyChatBot"
             ),
             InlineKeyboardButton(
-                text="• ɢʀσᴜᴘ ᴄʜᴧᴛ •",
-                url="https://t.me/rockyxsuppot"
+                text="• ᴍᴜsɪᴄ ʙᴏᴛ •",
+                url="https://t.me/ShriramxBot"
             ),
-        ],
-        [
-            InlineKeyboardButton(
-                text="✙ ʌᴅᴅ ϻє ɪη ʏσυʀ ɢʀσυᴘ ✙",
-                url=f"https://t.me/{app.username}?startgroup=true"
-            )
         ],
     ]
     return buttons
