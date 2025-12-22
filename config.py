@@ -28,7 +28,7 @@ BOT_USERNAME = getenv("BOT_USERNAME", "SonaliMusicBot")
 BOT_NAME = getenv("BOT_NAME", "Sonali Music")
 ASSUSERNAME = getenv("ASSUSERNAME")
 
-# ======================================================
+# ======================================
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 LOGGER_ID = int(getenv("LOGGER_ID", -1002141133985))
 
