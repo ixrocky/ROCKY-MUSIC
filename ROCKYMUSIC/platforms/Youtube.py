@@ -5,9 +5,9 @@ from typing import Union
 import yt_dlp
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
-from SaregamaMusic.utils.formatters import time_to_seconds
+from ROCKYMUSIC.utils.formatters import time_to_seconds
 import aiohttp
-from SaregamaMusic import LOGGER
+from ROCKYMUSIC import LOGGER
 
 try:
     from py_yt import VideosSearch
