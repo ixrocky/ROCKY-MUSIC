@@ -23,7 +23,6 @@ async def play_logs(message, streamtype):
 <b>ᴄʜᴀᴛ ɪᴅ :</b> <code>{message.chat.id}</code>
 <b>ᴄʜᴀᴛ ɴᴀᴍᴇ :</b> {message.chat.title}
 <b>ᴄʜᴀᴛ ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.chat.username}
-<b>◈ 𝐂𝗵𝗮𝘁 𝗠𝗲𝗺𝗯𝗲𝗿𝘀 ➪ </b> <code>{chat_members}</code>
 
 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>
 <b>ɴᴀᴍᴇ :</b> {message.from_user.mention}
