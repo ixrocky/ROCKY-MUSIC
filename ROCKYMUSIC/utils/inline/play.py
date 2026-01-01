@@ -77,17 +77,6 @@ def stream_markup_timer(_, chat_id, played, dur):
             InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
             InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
         ],
-        [
-            #InlineKeyboardButton(
-                text="ϲнατ вσт", url=f"https://t.me/komalchatbot"
-            ),
-            #InlineKeyboardButton(
-                text="ADD ME", url=f"https://t.me/komalchatbot"
-            ),
-            #InlineKeyboardButton(
-                text="ηεω вσт", url=f"https://t.me/anjalixmusicbot"
-            ),
-        ],
     ]
     return buttons
 
@@ -100,17 +89,6 @@ def stream_markup(_, chat_id):
             InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
             InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
             InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
-        ],
-        [
-            #InlineKeyboardButton(
-                text="ϲнατ вσт", url=f"https://t.me/komalchatbot"
-            ),
-            #InlineKeyboardButton(
-                text="ADD ME", url=f"https://t.me/komalchatbot"
-            ),
-            #InlineKeyboardButton(
-                text="ηεω вσт", url="https://t.me/anjalixmusicbot"
-            ),
         ],
     ]
     return buttons
