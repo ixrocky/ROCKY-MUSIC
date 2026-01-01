@@ -69,17 +69,21 @@ def stream_markup_timer(_, chat_id, played, dur):
                 text=f"{played} {bar} {dur}",
                 callback_data="GetTimer",
             )
+        ], 
+        [
+            #InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
+            #InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
+            #InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
+            #InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
+            #InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
         ],
-          [
+        [
             InlineKeyboardButton(
-                text="𝐔ρ𝖽αтєѕ", url=f"https://t.me/saragamaupdate"
+                text="ϲнατ вσт", url=f"https://t.me/komalchatbot"
             ),
-            InlineKeyboardButton(text=_["CLOSEMENU_BUTTON"], callback_data="𝖢𝗅𝗈𝗌𝖾"
-          ),
-         
-        
             InlineKeyboardButton(
-                text="𝐒υρρσɾƚ", url=f"https://t.me/Saregama_Music_Support"),
+                text="ηεω вσт", url=f"https://t.me/anjalixmusicbot"
+            ),
         ],
     ]
     return buttons
@@ -88,15 +92,19 @@ def stream_markup_timer(_, chat_id, played, dur):
 def stream_markup(_, chat_id):
     buttons = [
         [
+            #InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}"),
+            #InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}"),
+            #InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}"),
+            #InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}"),
+            #InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}"),
+        ],
+        [
             InlineKeyboardButton(
-                text="𝐔ρ𝖽αтєѕ", url=f"https://t.me/saragamaupdate"
+                text="ϲнατ вσт", url=f"https://t.me/komalchatbot"
             ),
-            InlineKeyboardButton(text=_["CLOSEMENU_BUTTON"], callback_data="𝖢𝗅𝗈𝗌𝖾"
-          ),
-         
-        
             InlineKeyboardButton(
-                text="𝐒υρρσɾƚ", url=f"https://t.me/Saregama_Music_Support"),
+                text="ηεω вσт", url="https://t.me/anjalixmusicbot"
+            ),
         ],
     ]
     return buttons
