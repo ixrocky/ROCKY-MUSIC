@@ -9,7 +9,7 @@ heroku3
 apscheduler
 motor 
 pillow==9.5.0
-py-tgcalls==2.2.8
+pytgcalls==3.0.0.dev24
 pykeyboard
 pyrofork
 python-dotenv
